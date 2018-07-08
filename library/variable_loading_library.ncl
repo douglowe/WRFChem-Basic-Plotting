@@ -50,6 +50,9 @@ dens_bc_aer  = 1.70
 dens_water_aer  = 1.0
 
 
+N_A = 6.02214e23    ; avogadro's number mol^-1
+R = 8.3144621       ; gas constant J/molK
+
 
 ;; conversion factors
 
@@ -61,6 +64,80 @@ dens_water_aer  = 1.0
 ; V = M * (R_d*T)/p = M * 0.7738, V^-1 = 1.2923 * M^-1
 ; Therefore multiply by factor 1.2923 to convert "/kg_dry" to "/sm^3"  
 conv_kg_sm3 = 1.2923
+
+
+
+;-------------------------------------------------------------------
+;     Convert from ppm to molecules cm^-3
+; !!! WARNING - Must have pressure in Pa !!!
+
+undef("ppm_moleconc_conv")
+function ppm_moleconc_conv(p:numeric, Temp:numeric)	; pressure [Pa], temperature [K]
+begin
+
+	if (p@units .eq. "Pa")
+		 ppm_conv_fac = 1e-12*N_A*p/(Temp*R)
+	else if (p@units .eq. "hPa")
+		 ppm_conv_fac = 1e-10*N_A*p/(Temp*R)
+	else
+		print("ppm_conv: must have pressure in units Pa or hPa")
+	end if
+	end if		
+
+	 return(ppm_conv_fac)
+
+end
+
+
+;-------------------------------------------------------------------;
+; get_grid_thickness	-	return the vertical thickness(del_z) of grid cells (in m)
+; SAN - 19/02/14 - Reframed to be calculated explicitly from geopotential at grid 
+; boundaries (unstaggered)
+
+; Height = full geopotential / 9.81
+
+undef("get_grid_thickness")
+function get_grid_thickness(PH:numeric, PHB:numeric, height:numeric)
+local z_stag, del_z, dims, nk, iz
+begin
+
+	; calculate the height at the staggered grid boundaries
+	z_stag = (PH + PHB)/9.81
+
+	; get dimension sizes of the domain
+	dims = dimsizes(height)
+
+	; create array for model thickness same size/type as the unstaggered height array
+	del_z = new(dims,typeof(height))
+	
+	
+	; check if the variable has 3 or 4 dimensions (i.e. does it have a time dimension or not)
+	if(dimsizes(dims).eq.4)
+		nk = dims(1)
+
+		; loop through the vertical, calculating thickness at each level:
+		do iz = 0, nk-1
+			del_z(:, iz, :, :) = z_stag(:, iz+1, :, :) - z_stag(:, iz, :, :)
+		end do
+	
+	else if (dimsizes(dims).eq.3)
+		nk = dims(0)
+
+		; loop through the vertical, calculating thickness at each level:
+		do iz = 0, nk-1
+			del_z(iz, :, :) = z_stag(iz+1, :, :) - z_stag(iz, :, :)
+		end do
+
+	end if
+	end if
+	
+
+	del_z@units = "m"
+	del_z@description = "Grid Thickness"
+
+    return(del_z)
+
+end
 
 
 
@@ -1225,6 +1302,27 @@ begin
 			else if(isStrSubset(species,"vbs9"))
 				vbs_string = "vbs9"
 				vbs_species = (/ "pcg9_f_c", "pcg9_f_o", "pcg9_b_c", "pcg9_b_o" /)
+			else if(isStrSubset(species,"ALL"))
+				vbs_string = "ALL"
+				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+								 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+								 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+								 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+								 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+								 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+								 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+								 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin", "water" \
+								/)
+			end if
 			end if
 			end if
 			end if
@@ -1514,6 +1612,69 @@ end
 
 
 
+undef("column_data_calculation")
+function column_data_calculation(FILES:list,var:string)
+local var_name, PH, PHB, height, grid_thickness, pres, tk, ppm_conv, var_temp, dims, var_temp_a
+begin
+		; pull out the variable name
+		var_name = str_sub_str(var, "_column","" )
+
+
+		; checks for data type, and then extract variable data
+		if(isStrSubset(var_name,"_a0") .or. isStrSubset(var_name,"_cw0") .or. \
+			isStrSubset(var_name,"_A0") .or. isStrSubset(var_name,"_CW0") .or. \
+			isStrSubset(var_name,"_fine") .or. isStrSubset(var_name,"_coarse") .or. \
+			isStrSubset(var_name,"_pm1") .or. isStrSubset(var_name,"_pm25") .or. isStrSubset(var_name,"_tot") )
+		
+			print("column calculation not set up for aerosol species yet, so can't process "+var)
+			exit
+
+		else
+			var_temp = wrf_user_getvar(FILES,var_name,-1)
+			
+			if(isatt(var_temp,"units"))
+				if(.not.isStrSubset(var_temp@units,"ppm") .and. .not.isStrSubset(var_temp@units,"PPM"))
+					print("column calculation requires input with units of ppmv, not "+var_temp@units)
+					print("  you will need to modify the code in variable_loading_library to process "+var_name)
+					exit
+				end if
+			else
+				print("no units information for "+var_name+" - column calculation requires ppmv, ")
+				print("   so we will assume this is what the units are, but please check to make sure this is right!")
+			end if
+			
+		end if
+
+		; pull out pressure height information, and calculate grid level thickness (in m)
+		PH = wrf_user_getvar(FILES,"PH",-1)
+		PHB = wrf_user_getvar(FILES,"PHB",-1)
+		height = wrf_user_getvar(FILES,"height",-1)
+		grid_thickness = get_grid_thickness(PH,PHB,height)
+
+
+		; convert from ppm to molecules / cm3
+		pres = wrf_user_getvar(FILES,"pres",-1)
+		tk   = wrf_user_getvar(FILES,"tk",-1)
+		ppm_conv  = ppm_moleconc_conv(pres, tk)
+		var_temp = var_temp * ppm_conv
+
+		; calculate molecules / cm2 / column for each grid cell (with conversion from m to cm for grid thickness)
+		var_temp = var_temp * grid_thickness * 100.
+		
+		; sum molecules / cm2 for all columns
+		dims = dimsizes(var_temp)
+		if(dimsizes(dims).eq.4)
+			var_temp_a = dim_sum_n_Wrap(var_temp,1)	
+		else if(dimsizes(dims).eq.3)
+			var_temp_a = dim_sum_n_Wrap(var_temp,0)			
+		end if
+		end if
+		var_temp_a@units = "molecules/cm2"
+
+		return(var_temp_a)
+
+end
+
 
 
 ;;;;;;; general variable loading routine ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1573,6 +1734,14 @@ begin
 		lambda_new = 550.                                ; new wavelength to be determined
 	
 		var_temp = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
+
+
+	; If we wish to get the column concentration of a gas through the atmosphere then follow this process
+	else if(isStrSubset(var,"_column"))
+
+		
+		var_temp = column_data_calculation(FILES,var)
+
 	
 	; If we wish to find the value of something below cloud then follow this process
 	else if(isStrSubset(var,"_belowcloud").or.isStrSubset(var,"_atcloud"))
@@ -1835,6 +2004,7 @@ begin
 	else ; process as a gas species
 		var_temp = wrf_user_getvar(FILES,var,-1)
 	
+	end if
 	end if
 	end if
 	end if
