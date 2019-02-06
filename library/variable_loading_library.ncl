@@ -1407,8 +1407,14 @@ end
 undef("calc_ang_exp_loge")
 function calc_ang_exp_loge(lambda_1[1]:numeric,tau_1:numeric,\
                       lambda_2[1]:numeric,tau_2:numeric)
+local tau_1_local, tau_2_local, lambda_1_local, lambda_2_local
 begin
-	Ang = ( log(tau_1/tau_2) / log(lambda_1/lambda_2) )
+	tau_1_local = where(tau_1.gt.0.and.tau_2.gt.0,tau_1,1.0)
+	tau_2_local = where(tau_1.gt.0.and.tau_2.gt.0,tau_2,1.0)
+	lambda_1_local = where(lambda_1.gt.0.and.lambda_2.gt.0,lambda_1,1.0)
+	lambda_2_local = where(lambda_1.gt.0.and.lambda_2.gt.0,lambda_2,1.0)
+	
+	Ang = ( log(tau_1_local/tau_2_local) / log(lambda_1_local/lambda_2_local) )
 	return(Ang)
 end
 
@@ -1723,7 +1729,7 @@ begin
 
 
 	; If we want the Aerosol Optical Thickness at 550nm wavelength, then follow this process
-	else if(var .eq. "TAU55")
+	else if(var .eq. "TAU55" .or. var .eq. "AOD550")
 		;Calculate tau, from two given wavelengths (i.e. intermediate btwn the two lambda's)  
 		lambda_1 = 300.                                ; wavelength1
 		tau_1 = wrf_user_getvar(FILES,"TAUAER1",-1)         ; AOD data for wavelength1
@@ -1733,8 +1739,14 @@ begin
 		tau_3 = wrf_user_getvar(FILES,"TAUAER4",-1)         ; AOD data for wavelength2
 		lambda_new = 550.                                ; new wavelength to be determined
 	
-		var_temp = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
-
+		if(var .eq. "TAU55")
+			var_temp = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
+		else if(var .eq. "AOD550")
+			var_temp_a = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
+			; sum over vertical axis (dimension #1)
+			var_temp = dim_sum_n_Wrap(var_temp_a,1)
+		end if
+		end if
 
 	; If we wish to get the column concentration of a gas through the atmosphere then follow this process
 	else if(isStrSubset(var,"_column"))
