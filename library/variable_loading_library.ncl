@@ -953,7 +953,123 @@ begin
 		
 		units = "ug/kg-dryair"
 		
-		if(isStrSubset(species,"ocratio")) ; solve O:C ratio
+		if(isStrSubset(species,"amsratio")) ; solve inorganic:organic ratio
+
+			vbs_string = "amsratio"
+			
+			;;;;; first extract the organic data
+			vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+							 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+							 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+							 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+							 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+							 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+							 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+							 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+							 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+							 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+							 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+							 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+							 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+							 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+							 "oc" /)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_a = var_a + dummy
+			end do
+
+
+			;;;;; then extract the inorganic data
+			vbs_species := (/ "so4", "no3", "nh4", "na", "cl" /)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_b = var_b + dummy
+			end do
+
+			;;;;; now calculate the inorganic:organic ratio
+			
+			var_a = var_b/where(var_a .gt. 1e-12, var_a, 1e-12)
+
+
+			units = ""
+
+		else if(isStrSubset(species,"ioratio")) ; solve inorganic:organic ratio
+
+			vbs_string = "ioratio"
+			
+			;;;;; first extract the organic data
+			vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+							 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+							 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+							 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+							 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+							 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+							 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+							 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+							 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+							 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+							 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+							 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+							 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+							 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+							 "oc" /)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_a = var_a + dummy
+			end do
+
+
+			;;;;; then extract the inorganic data
+			vbs_species := (/ "bc", "so4", "no3", "nh4", "na", "cl", "oin" /)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_b = var_b + dummy
+			end do
+
+			;;;;; now calculate the inorganic:organic ratio
+			
+			var_a = var_b/where(var_a .gt. 1e-12, var_a, 1e-12)
+
+
+			units = ""
+
+		else if(isStrSubset(species,"ocratio")) ; solve O:C ratio
 
 			vbs_string = "ocratio"
 			
@@ -1322,6 +1438,27 @@ begin
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
 								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin", "water" \
 								/)
+			else if(isStrSubset(species,"DRY"))
+				vbs_string = "DRY"
+				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+								 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+								 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+								 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+								 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+								 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+								 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+								 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin" \
+								/)
+			end if
 			end if
 			end if
 			end if
@@ -1380,7 +1517,8 @@ begin
 		
 		end if ; select for fraction processing or not
 		end if ; select for O:C ratio solving or not
-		
+		end if ; select for inorganic:organic ratio solving or not
+		end if ; select for AMS relevant inorganic:organic ratio solving or not
 		
 
 
