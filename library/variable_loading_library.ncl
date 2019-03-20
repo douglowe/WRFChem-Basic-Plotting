@@ -7,7 +7,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRFUserARW.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/time_axis_labels.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/wrf/WRF_contributed.ncl"
 
-load "./WRFCHEM_misc_stats.ncl"
+load "/Volumes/Odin/YRD_China/data_plotting/scripts/library/WRFCHEM_misc_stats.ncl"
 
 begin
 
@@ -1925,7 +1925,7 @@ begin
 			isStrSubset(var_name,"_pm1") .or. isStrSubset(var_name,"_pm25") .or. isStrSubset(var_name,"_tot") )
 		
 			; check if we are processing a VBS aerosol species or not
-			if(vbs)
+			if(.not.ismissing(vbs).and.vbs)
 				var_temp_b = get_vbs_aerosol(FILES,var_name,True,-1)
 			else
 				var_temp_b = get_aerosol(FILES,var_name,True,-1)		
@@ -2145,7 +2145,7 @@ begin
 			isStrSubset(var,"_pm1") .or. isStrSubset(var,"_pm25") .or. isStrSubset(var,"_tot") )
 		
 		; check if we are processing a VBS aerosol species or not
-		if(vbs)
+		if(.not.ismissing(vbs).and.vbs)
 			var_temp = get_vbs_aerosol(FILES,var,True,-1)
 		else
 			var_temp = get_aerosol(FILES,var,True,-1)		
