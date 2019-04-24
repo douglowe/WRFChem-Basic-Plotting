@@ -2187,8 +2187,16 @@ begin
 				else
 					print("don't recognise molecular weight flag ("+var_units@$var$(2)+"), so not converting from ppmv to ug/kg-dryair")
 				end if
+			else if(unit_new .eq. "molecules/cm3")
+				; convert from ppm to molecules / cm3
+				pres = wrf_user_getvar(FILES,"pres",-1)
+				tk   = wrf_user_getvar(FILES,"tk",-1)
+				ppm_conv  = ppm_moleconc_conv(pres, tk)
+				var_temp = var_temp * ppm_conv
+				var_temp@units = unit_new
 			else
 				print("don't recognise new unit '"+new_unit+"', so not converting units")		
+			end if
 			end if
 			end if
 			end if
