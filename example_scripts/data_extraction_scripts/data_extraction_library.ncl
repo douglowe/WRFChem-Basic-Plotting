@@ -41,6 +41,8 @@ VBS_SPECIES@DRY_pm1 = True
 VBS_SPECIES@ocratio_pm1 = True
 VBS_SPECIES@ioratio_pm1 = True
 VBS_SPECIES@amsratio_pm1 = True
+VBS_SPECIES@ALL_pm25 = True
+VBS_SPECIES@DRY_pm25 = True
 
 
 ;;; default colormap - this could be changed in the calling script if needed
@@ -282,7 +284,7 @@ undef("create_output_file")
 procedure create_output_file(FILES:list,file_path:string,file_name:string,\
 									var_array:string)
 local FOUT, Times, XLAT, XLONG, XTEMPLATE, dimNames, dimSizes, dimUnlim, \
-		var_att, ii
+		var_att, ii, dSizes, dNames, west_east, south_north
 begin
 
 ;; set NetCDF options, to take advantage of space-saving features
@@ -311,9 +313,17 @@ XLAT  := XLAT(0,:,:)
 XLONG := XLONG(0,:,:)
 
 
+;; get the file dimensions, and names
+dSizes = getfiledimsizes(FILES[0])
+dNames = getvardims(FILES[0])
+
+;; extract west_east and south_north information from the original datafile
+west_east   = dSizes(ind(dNames.eq."west_east"))
+south_north = dSizes(ind(dNames.eq."south_north"))
+
 ;; define the required dimensions for our new file, and add them to the file
 dimNames = (/"Time","DateStrLen","west_east","south_north"/)
-dimSizes = (/ -1, 19, 54, 54 /)
+dimSizes = (/ -1, 19, west_east, south_north /)
 dimUnlim = (/True, False, False, False/)
 filedimdef(FOUT,dimNames,dimSizes,dimUnlim)
 

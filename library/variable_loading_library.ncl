@@ -1069,6 +1069,63 @@ begin
 
 			units = ""
 
+		else if(isStrSubset(species,"anthro_ocratio")) ; solve O:C ratio
+
+			vbs_string = "anthro_ocratio"
+			
+			;;;;; first extract the Carbon data
+			vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+							 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+							 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+							 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c" \
+							/)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_a = var_a + dummy
+			end do
+
+			; convert from "carbon" to proper carbon (assuming a fixed carbon:other ratio in model)
+			;        this is taken directly from module_mosaic_driver.F
+			var_a = var_a * (180.0/211.0)
+
+
+			;;;;; then extract the Oxygen data
+			vbs_species = (/ "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+							 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+							 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+							 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o" \
+							/)
+
+			; record number of vbs species to be extracted
+			num_vbs = dimsizes(vbs_species)
+
+			; loop through the species listed for extraction
+			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+			do ispec = 1, num_vbs-1
+				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+				var_b = var_b + dummy
+			end do
+
+			;;;;; now calculate the O:C ratio
+			; convert from ug/kg_air to ~mol/kg_air
+			var_a = var_a / m_carbon
+			var_b = var_b / m_oxygen
+			
+			var_a = var_b/where(var_a .gt. 1e-12, var_a, 1e-12)
+
+
+			units = ""
+
 		else if(isStrSubset(species,"ocratio")) ; solve O:C ratio
 
 			vbs_string = "ocratio"
@@ -1471,6 +1528,7 @@ begin
 			end if
 			end if
 			end if		
+			end if
 			end if
 			end if
 			end if

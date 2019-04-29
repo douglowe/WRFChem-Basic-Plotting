@@ -28,6 +28,12 @@ VBS_SPECIES = True
 VBS_SPECIES@OM_pm1  = True
 VBS_SPECIES@OM_pm25 = True
 VBS_SPECIES@OM_tot  = True
+VBS_SPECIES@ocratio_pm1  = True
+VBS_SPECIES@ocratio_pm25 = True
+VBS_SPECIES@ocratio_tot  = True 
+VBS_SPECIES@anthro_ocratio_pm1  = True
+VBS_SPECIES@anthro_ocratio_pm25 = True
+VBS_SPECIES@anthro_ocratio_tot  = True 
 
 
 
