@@ -943,9 +943,34 @@ end
 ; DL 8/5/2015 - using inc_cw to control inclusion of cloud variables. Also added more options
 ;               for VBS schemes to extract (and a check for what variables are in the file).
 
+undef("vbs_species_extract_loop")
+function vbs_species_extract_loop(a:list,species:string,vbs_string:string,vbs_species:string,\
+								inc_cw:logical,time_in:integer)
+local var_a, num_vbs, ispec, spc_extract, dummy
+begin
+
+	; record number of vbs species to be extracted
+	num_vbs = dimsizes(vbs_species)
+
+	; loop through the species listed for extraction
+	spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
+	var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+	do ispec = 1, num_vbs-1
+		spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
+		dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
+		var_a = var_a + dummy
+	end do
+
+
+	return(var_a)
+
+end
+
+
+
 undef("get_vbs_aerosol")
 function get_vbs_aerosol(a:list,species:string,inc_cw:logical,time_in:integer)
-local vbs_species, vbs_species_exist, vbs_string, num_vbs, ispec, dummy, units, var_b, desc
+local vbs_species, vbs_species_exist, vbs_string, num_vbs, ispec, dummy, units, var_b, desc, var_a, var_c
 begin
 
 
@@ -975,34 +1000,15 @@ begin
 							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
 							 "oc" /)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_a = var_a + dummy
-			end do
+			; obtain the organic mass
+			var_a = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 
 			;;;;; then extract the inorganic data
 			vbs_species := (/ "so4", "no3", "nh4", "na", "cl" /)
+			; obtain the inorganic mass
+			var_b = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_b = var_b + dummy
-			end do
 
 			;;;;; now calculate the inorganic:organic ratio
 			
@@ -1033,36 +1039,73 @@ begin
 							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
 							 "oc" /)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_a = var_a + dummy
-			end do
+			; obtain the organic mass
+			var_a = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 
 			;;;;; then extract the inorganic data
 			vbs_species := (/ "bc", "so4", "no3", "nh4", "na", "cl", "oin" /)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_b = var_b + dummy
-			end do
+			; obtain the inorganic mass
+			var_b = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 			;;;;; now calculate the inorganic:organic ratio
+			
+			var_a = var_b/where(var_a .gt. 1e-12, var_a, 1e-12)
+
+
+			units = ""
+
+		else if(isStrSubset(species,"vbs_soa_ocratio")) ; solve O:C ratio
+
+			vbs_string = "vbs_soa_ocratio"
+			
+			;;;;; first extract the Carbon data
+			vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+							 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+							 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+							 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+							 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+							 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+							 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+							 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c" \
+							/)
+			; obtain the carbon mass
+			var_a = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
+
+			; convert from "carbon" to proper carbon (assuming a fixed carbon:other ratio in model)
+			;        this is taken directly from module_mosaic_driver.F
+			var_a = var_a * (180.0/211.0)
+
+
+			;;;;; then extract the Oxygen data
+			vbs_species = (/ "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+							 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+							 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+							 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+							 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+							 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o" \
+							/)
+			; obtain the oxygen mass
+			var_b = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
+
+			;;;;; then extract the SOA data
+			vbs_species := (/ "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							 "biog1_c", "biog2_c", "biog3_c", "biog4_c" /)
+			; obtain the SOA mass
+			var_c = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
+
+			; add carbon from SOA to carbon data (converting from SOA mass to carbon mass, following Shrivastava et al, 2011)
+			var_a = var_a + (/ var_c / 1.9 /)  ; 1.9 = ratio of OM to OC
+			; add oxygen from SOA to oxygen data (converting from SOA mass to oxygen mass, following Shrivastava et al, 2011)
+			var_b = var_b + (/ var_c / (1.9*1.875) /)  ; 1.9 = ratio of OM to OC, and 1.875 = C:O mass ratio
+
+
+			;;;;; now calculate the O:C ratio
+			; convert from ug/kg_air to ~mol/kg_air
+			var_a = var_a / m_carbon
+			var_b = var_b / m_oxygen
 			
 			var_a = var_b/where(var_a .gt. 1e-12, var_a, 1e-12)
 
@@ -1079,18 +1122,8 @@ begin
 							 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
 							 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c" \
 							/)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_a = var_a + dummy
-			end do
+			; obtain the carbon mass
+			var_a = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 			; convert from "carbon" to proper carbon (assuming a fixed carbon:other ratio in model)
 			;        this is taken directly from module_mosaic_driver.F
@@ -1103,18 +1136,8 @@ begin
 							 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
 							 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o" \
 							/)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_b = var_b + dummy
-			end do
+			; obtain the oxygen mass
+			var_b = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 			;;;;; now calculate the O:C ratio
 			; convert from ug/kg_air to ~mol/kg_air
@@ -1140,18 +1163,8 @@ begin
 							 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
 							 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c" \
 							/)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_a = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_a = var_a + dummy
-			end do
+			; obtain the carbon mass
+			var_a = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 			; convert from "carbon" to proper carbon (assuming a fixed carbon:other ratio in model)
 			;        this is taken directly from module_mosaic_driver.F
@@ -1168,18 +1181,8 @@ begin
 							 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 							 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o" \
 							/)
-
-			; record number of vbs species to be extracted
-			num_vbs = dimsizes(vbs_species)
-
-			; loop through the species listed for extraction
-			spc_extract = str_sub_str(species, vbs_string, vbs_species(0))
-			var_b = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-			do ispec = 1, num_vbs-1
-				spc_extract = str_sub_str(species, vbs_string, vbs_species(ispec))
-				dummy = (/ get_aerosol(a,spc_extract,inc_cw,time_in) /)
-				var_b = var_b + dummy
-			end do
+			; obtain the oxygen mass
+			var_b = vbs_species_extract_loop(a,species,vbs_string,vbs_species,inc_cw,time_in)
 
 			;;;;; now calculate the O:C ratio
 			; convert from ug/kg_air to ~mol/kg_air
@@ -1391,15 +1394,9 @@ begin
 								/)
 			else if(isStrSubset(species,"soa"))
 				vbs_string = "soa"
-				vbs_species = (/ "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
-								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
-								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
-								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
-								 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
-								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
-								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
-								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o" \
-								/)
+				vbs_species = (/ "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							 	 "biog1_c", "biog2_c", "biog3_c", "biog4_c" \
+							 	/)
 			else if(isStrSubset(species,"totoa"))
 				vbs_string = "totoa"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
@@ -1438,7 +1435,29 @@ begin
 								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
-								 "oc" \
+								 "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
+							     "oc" \
+								/)
+			else if(isStrSubset(species,"POA"))
+				vbs_string = "POA"
+				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+								 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+								 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+								 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+								 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+								 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+								 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+								 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+							     "oc" \
 								/)
 			else if(isStrSubset(species,"vbs1"))
 				vbs_string = "vbs1"
@@ -1536,6 +1555,7 @@ begin
 			end if
 			end if
 			end if
+			end if
 
 			vbs_species_2 = vbs_species
 			;;; check which of these species are in the source file
@@ -1575,6 +1595,7 @@ begin
 		
 		end if ; select for fraction processing or not
 		end if ; select for O:C ratio solving or not
+		end if ; select for VBS+SOA O:C ratio solving or not		
 		end if ; select for inorganic:organic ratio solving or not
 		end if ; select for AMS relevant inorganic:organic ratio solving or not
 		
@@ -2245,7 +2266,7 @@ begin
 				else
 					print("don't recognise molecular weight flag ("+var_units@$var$(2)+"), so not converting from ppmv to ug/kg-dryair")
 				end if
-			else if(unit_new .eq. "molecules/cm3")
+			else if(unit_new .eq. "molecules/cm3" .or. unit_new .eq. "molecules/cm~S~3~N~")
 				; convert from ppm to molecules / cm3
 				pres = wrf_user_getvar(FILES,"pres",-1)
 				tk   = wrf_user_getvar(FILES,"tk",-1)
