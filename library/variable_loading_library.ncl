@@ -1415,6 +1415,8 @@ begin
 								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc" \
 								/)
 			else if(isStrSubset(species,"OM"))
@@ -1512,6 +1514,8 @@ begin
 								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin", "water" \
 								/)
 			else if(isStrSubset(species,"DRY"))
@@ -1532,6 +1536,8 @@ begin
 								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin" \
 								/)
 			end if
