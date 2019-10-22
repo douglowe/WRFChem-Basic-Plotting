@@ -1463,6 +1463,10 @@ begin
 				vbs_string = "INORG"
 				vbs_species = (/ "so4", "no3", "nh4", "na", "cl" \
 								/)
+			elseif(isStrSubset(species,"AMSINORG"))
+				vbs_string = "AMSINORG"
+				vbs_species = (/ "so4", "no3", "nh4", "cl" \
+								/)
 			elseif(isStrSubset(species,"ALLDRY"))
 				vbs_string = "ALLDRY"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \

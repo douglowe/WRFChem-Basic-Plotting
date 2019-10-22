@@ -52,10 +52,9 @@ if (.not. isvar("domain")) then
 end if
 
 
-file_variables = (/ "AOD550", "PM1_mass", "OC_ratio", "Inorg_Org_ratio" /)
+file_variables := (/ "AOD550", "PM1_mass", "OC_ratio", "PM25_mass", "PM10_mass", "PM1_VBS_OM", "PM1_SOA_OM", "PM1_Inorg" /)
+proc_variables = (/"AOD550", "DRY_pm1", "ocratio_pm1", "DRY_pm25", "DRY_tot", "POA_pm1", "soa_pm1", "AMSINORG_pm1"/)
 
-file_variables := (/"AOD550", "PM1_mass", "OC_ratio", "Inorg_Org_ratio", "AMS_Inorg_Org_ratio"/)
-proc_variables = (/"AOD550", "DRY_pm1", "ocratio_pm1", "ioratio_pm1", "amsratio_pm1"/)
 
 ; This flag determines if we want to plot a set of defined time points, or the whole campaign.
 ;    True -> plot the chosen times
@@ -100,11 +99,23 @@ variable_unit_description@AOD550 = ""
 variable_description@PM1_mass      = "Dry PM1 aerosol mass"
 variable_unit_description@PM1_mass = "ug/kg-dryair"
 
-variable_description@OC_ratio      = "PM1 Organic Mass Oxygen:Carbon (mass) ratio"
+variable_description@OC_ratio      = "PM1 Organic Mass Oxygen:Carbon ratio"
 variable_unit_description@OC_ratio = ""
 
-variable_description@Inorg_Org_ratio         = "PM1 Inorganic:organic (mass) ratio"
-variable_unit_description@Inorg_Org_ratio    = ""
+variable_description@PM25_mass   = "Dry PM2.5 aerosol mass"
+variable_unit_description@PM25_mass = "ug/kg-dryair"
+
+variable_description@PM10_mass   = "Dry PM10 aerosol mass"
+variable_unit_description@PM10_mass = "ug/kg-dryair"
+
+variable_description@PM1_VBS_OM = "PM1 VBS organic mass"
+variable_unit_description@PM1_VBS_OM = "ug/kg-dryair"
+
+variable_description@PM1_SOA_OM = "PM1 SOA organic mass"
+variable_unit_description@PM1_SOA_OM = "ug/kg-dryair"
+
+variable_description@PM1_Inorg = "PM1 Inorganic mass (without OIN, BC, or Na)"
+variable_unit_description@PM1_OM = "ug/kg-dryair"
 
 
 
