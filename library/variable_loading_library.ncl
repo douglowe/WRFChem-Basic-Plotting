@@ -77,11 +77,10 @@ begin
 
 	if (p@units .eq. "Pa")
 		 ppm_conv_fac = 1e-12*N_A*p/(Temp*R)
-	else if (p@units .eq. "hPa")
+	elseif (p@units .eq. "hPa")
 		 ppm_conv_fac = 1e-10*N_A*p/(Temp*R)
 	else
 		print("ppm_conv: must have pressure in units Pa or hPa")
-	end if
 	end if		
 
 	 return(ppm_conv_fac)
@@ -120,7 +119,7 @@ begin
 			del_z(:, iz, :, :) = z_stag(:, iz+1, :, :) - z_stag(:, iz, :, :)
 		end do
 	
-	else if (dimsizes(dims).eq.3)
+	elseif (dimsizes(dims).eq.3)
 		nk = dims(0)
 
 		; loop through the vertical, calculating thickness at each level:
@@ -128,7 +127,6 @@ begin
 			del_z(iz, :, :) = z_stag(iz+1, :, :) - z_stag(iz, :, :)
 		end do
 
-	end if
 	end if
 	
 
@@ -161,21 +159,17 @@ begin
 	  if(isStrSubset(species,"_f_c") .or. isStrSubset(species,"_f_o") \
 	  		.or. isStrSubset(species,"_b_c") .or. isStrSubset(species,"_b_o")) ; VBS compounds
 		   conv_fac = m_dry/m_vbs
-	  else if(isStrSubset(species,"no3"))
+	  elseif(isStrSubset(species,"no3"))
 		   conv_fac = m_dry/m_no3
-	  else if(isStrSubset(species,"so4"))
+	  elseif(isStrSubset(species,"so4"))
 		   conv_fac = m_dry/m_so4
-	  else if(isStrSubset(species,"nh4"))
+	  elseif(isStrSubset(species,"nh4"))
 		   conv_fac = m_dry/m_nh4
-	  else if(isStrSubset(species,"cl"))
+	  elseif(isStrSubset(species,"cl"))
 		   conv_fac = m_dry/m_cl
 	  else
 	       print("don't recognise species "+species+" for processing in ppm_ugkg_conv")
 	       conv_fac = 1.0
-	  end if
-	  end if
-	  end if
-	  end if
 	  end if
 			   
 	  ;; convert from ppm to ppb, then convert to ug/kg		   
@@ -221,11 +215,11 @@ begin
 				temp8 = (/wrf_user_getvar(a,var+"_cw08",time_in)/)
 				var_out = temp1 + temp2 + temp3 + temp4 + temp5 + temp6 + temp7 + temp8
 
-			else if(isStrSubset(grp,"a0")) ;; loading an individual aerosol variable
+			elseif(isStrSubset(grp,"a0")) ;; loading an individual aerosol variable
 
 				var_out = wrf_user_getvar(a,var+grp,time_in)
 
-			else if( any(grp.eq.(/"pm1","pm25","tot"/)) ) ;;; loading aerosol groups
+			elseif( any(grp.eq.(/"pm1","pm25","tot"/)) ) ;;; loading aerosol groups
 
 				temp1 = (/wrf_user_getvar(a,var+"_a01",time_in)/)
 				temp2 = (/wrf_user_getvar(a,var+"_a02",time_in)/)
@@ -235,7 +229,7 @@ begin
 
 				if(grp .eq. "pm1")  ;; loading pm1 variables  (interstital aerosol only) 
 					var_out = temp1 + temp2 + temp3 + temp4 + 0.678*temp5
-				else if(grp .eq. "pm25") ;; loading pm2.5 variables  (interstital aerosol only)
+				elseif(grp .eq. "pm25") ;; loading pm2.5 variables  (interstital aerosol only)
 					temp6 = (/wrf_user_getvar(a,var+"_a06",time_in)/)
 					var_out = temp1 + temp2 + temp3 + temp4 + temp5 + temp6
 				else 
@@ -243,17 +237,14 @@ begin
 					temp7 = (/wrf_user_getvar(a,var+"_a07",time_in)/)
 					temp8 = (/wrf_user_getvar(a,var+"_a08",time_in)/)
 					var_out = temp1 + temp2 + temp3 + temp4 + temp5 + temp6 + temp7 + temp8
-				end if
 				end if	
 
 			else
 				print("don't know how to deal with group "+grp+" in load_aero_set_var function")
 				exit
 			end if
-			end if
-			end if
 
-		else if (isfilevar(a[0],"num_a04")) ;;; work with 4 bin aerosol
+		elseif (isfilevar(a[0],"num_a04")) ;;; work with 4 bin aerosol
 		
 			;;; determine which group we're loading
 			if(grp .eq. "cw")   ;; loading cloud water variables
@@ -264,11 +255,11 @@ begin
 				temp4 = (/wrf_user_getvar(a,var+"_cw04",time_in)/)
 				var_out = temp1 + temp2 + temp3 + temp4
 
-			else if(isStrSubset(grp,"a0")) ;; loading an individual aerosol variable
+			elseif(isStrSubset(grp,"a0")) ;; loading an individual aerosol variable
 
 				var_out = wrf_user_getvar(a,var+grp,time_in)
 
-			else if( any(grp.eq.(/"pm1","pm25","tot"/)) ) ;;; loading aerosol groups
+			elseif( any(grp.eq.(/"pm1","pm25","tot"/)) ) ;;; loading aerosol groups
 
 				temp1 = (/wrf_user_getvar(a,var+"_a01",time_in)/)
 				temp2 = (/wrf_user_getvar(a,var+"_a02",time_in)/)
@@ -276,26 +267,22 @@ begin
 
 				if(grp .eq. "pm1")  ;; loading pm1 variables  (interstital aerosol only) 
 					var_out = temp1 + temp2 + (0.678/2.0)*temp3 
-				else if(grp .eq. "pm25") ;; loading pm2.5 variables  (interstital aerosol only)
+				elseif(grp .eq. "pm25") ;; loading pm2.5 variables  (interstital aerosol only)
 					var_out = temp1 + temp2 + temp3
 				else 
 					temp4 = (/wrf_user_getvar(a,var+"_a04",time_in)/)
 					var_out = temp1 + temp2 + temp3 + temp4
 				end if
-				end if	
 
 			else
 				print("don't know how to deal with group "+grp+" in load_aero_set_var function")
 				exit
-			end if
-			end if
 			end if
 
 		
 		else
 			print("need to use 8 bin or 4 bin MOSAIC aerosol")
 			exit
-		end if
 		end if
 
 	else
@@ -372,14 +359,12 @@ begin
 	;;; transfer file atts
 	if(grp.eq."pm1")
 		ph@description = "PM1 pH"
-	else if(grp.eq."pm25")
+	elseif(grp.eq."pm25")
 		ph@description = "PM2.5 pH"
-	else if(grp.eq."tot")
+	elseif(grp.eq."tot")
 		ph@description = "PM10 pH"
 	else
 		ph@description = "aerosol "+grp+" pH"
-	end if
-	end if
 	end if
 	ph@units = ""
 
@@ -629,18 +614,18 @@ begin
         	spec_list = (/sh_spec+"1",sh_spec+"2"/)
         	desc = "Total "+sh_spec
         
-		else if ( any(species .eq. (/ "seas_tot", "SEAS_tot"/)) )
+		elseif ( any(species .eq. (/ "seas_tot", "SEAS_tot"/)) )
 			; 4 sea-salt bins
         	spec_list = (/"SEAS_1","SEAS_2","SEAS_3","SEAS_4"/)
 			desc      = "Total sea-salt"
 
-		else if ( any(species .eq. (/ "dust_tot", "DUST_tot"/)) )
+		elseif ( any(species .eq. (/ "dust_tot", "DUST_tot"/)) )
 			; 5 dust bins
         	spec_list = (/"DUST_1","DUST_2","DUST_3","DUST_4", "DUST_5"/)
 			desc      = "Total dust"
 		
 
-		else if(species .eq. "sulf_tot")
+		elseif(species .eq. "sulf_tot")
 			; estimate the total sulfate mass, including ammonium componant
 			; See sum_pm_gocart in module_gocart_aerosols.F for equation		
 			spec_list = (/ "sulf" /)
@@ -654,9 +639,6 @@ begin
 			print("get_aerosol: can only sum OC_tot, BC_tot, dust_tot, seas_tot and sulf_tot GOCART aerosol")
 			break
 			
-		end if
-		end if
-		end if 
 		end if
 		
 		nspec = dimsizes(spec_list)
@@ -673,7 +655,7 @@ begin
 		
 ;**********************     MOSAIC aerosol     *************************;
 	
-	else if (isfilevar(a[0],"num_a01"))	; ismosaic
+	elseif (isfilevar(a[0],"num_a01"))	; ismosaic
 
 		; Declare mapping arrays (in 8-bin mode). 
 		fine_array   = (/ 1., 1., 1., 1., 0., 0., 0., 0. /)	; fine = smallest 4 bins
@@ -703,119 +685,97 @@ begin
 			sh_spec   = str_sub_str(species, "_fine","" )
 			array_map = fine_array
 			mode_name = "fine mode"
-		else if(isStrSubset(species,"coarse") ) ; returns true if species contais "coarse"
+		elseif(isStrSubset(species,"coarse") ) ; returns true if species contais "coarse"
 			sh_spec   = str_sub_str(species, "_coarse","" )
 			array_map = coarse_array
 			mode_name = "coarse mode"
-		else if(isStrSubset(species,"tot") ) ; returns true if species contais "tot"		 
+		elseif(isStrSubset(species,"tot") ) ; returns true if species contais "tot"		 
 			sh_spec = str_sub_str(species, "_tot","" )
 			array_map = tot_array
 			mode_name = "PM10"
-		else if(isStrSubset(species,"pm25") ) ; returns true if species contais "pm25"		 
+		elseif(isStrSubset(species,"pm25") ) ; returns true if species contais "pm25"		 
 			sh_spec = str_sub_str(species, "_pm25","" )
 			array_map = pm25_array
 			mode_name = "PM2.5"
-		else if(isStrSubset(species,"pm1") ) ; returns true if species contais "pm1"
+		elseif(isStrSubset(species,"pm1") ) ; returns true if species contais "pm1"
 			sh_spec   = str_sub_str(species, "_pm1","" )
 			array_map = pm1_array
 			mode_name = "PM1"
-		else if(isStrSubset(species,"a01") )
+		elseif(isStrSubset(species,"a01") )
 			sh_spec   = str_sub_str(species, "_a01","" )
 			array_map = a01_array
 			mode_name = "a01"
-		else if(isStrSubset(species,"a02") )
+		elseif(isStrSubset(species,"a02") )
 			sh_spec   = str_sub_str(species, "_a02","" )
 			array_map = a02_array
 			mode_name = "a02"
-		else if(isStrSubset(species,"a01") )
+		elseif(isStrSubset(species,"a01") )
 			sh_spec   = str_sub_str(species, "_a01","" )
 			array_map = a01_array
 			mode_name = "a01"
-		else if(isStrSubset(species,"a03") )
+		elseif(isStrSubset(species,"a03") )
 			sh_spec   = str_sub_str(species, "_a03","" )
 			array_map = a03_array
 			mode_name = "a03"
-		else if(isStrSubset(species,"a04") )
+		elseif(isStrSubset(species,"a04") )
 			sh_spec   = str_sub_str(species, "_a04","" )
 			array_map = a04_array
 			mode_name = "a04"
-		else if(isStrSubset(species,"a05") )
+		elseif(isStrSubset(species,"a05") )
 			sh_spec   = str_sub_str(species, "_a05","" )
 			array_map = a05_array
 			mode_name = "a05"
-		else if(isStrSubset(species,"a06") )
+		elseif(isStrSubset(species,"a06") )
 			sh_spec   = str_sub_str(species, "_a06","" )
 			array_map = a06_array
 			mode_name = "a06"
-		else if(isStrSubset(species,"a07") )
+		elseif(isStrSubset(species,"a07") )
 			sh_spec   = str_sub_str(species, "_a07","" )
 			array_map = a07_array
 			mode_name = "a07"
-		else if(isStrSubset(species,"a08") )
+		elseif(isStrSubset(species,"a08") )
 			sh_spec   = str_sub_str(species, "_a08","" )
 			array_map = a08_array
 			mode_name = "a08"
-		else if(isStrSubset(species,"cw01") )
+		elseif(isStrSubset(species,"cw01") )
 			sh_spec   = str_sub_str(species, "_cw01","" )
 			array_map = cw01_array
 			mode_name = "cw01"
-		else if(isStrSubset(species,"cw02") )
+		elseif(isStrSubset(species,"cw02") )
 			sh_spec   = str_sub_str(species, "_cw02","" )
 			array_map = cw02_array
 			mode_name = "cw02"
-		else if(isStrSubset(species,"cw01") )
+		elseif(isStrSubset(species,"cw01") )
 			sh_spec   = str_sub_str(species, "_cw01","" )
 			array_map = cw01_array
 			mode_name = "cw01"
-		else if(isStrSubset(species,"cw03") )
+		elseif(isStrSubset(species,"cw03") )
 			sh_spec   = str_sub_str(species, "_cw03","" )
 			array_map = cw03_array
 			mode_name = "cw03"
-		else if(isStrSubset(species,"cw04") )
+		elseif(isStrSubset(species,"cw04") )
 			sh_spec   = str_sub_str(species, "_cw04","" )
 			array_map = cw04_array
 			mode_name = "cw04"
-		else if(isStrSubset(species,"cw05") )
+		elseif(isStrSubset(species,"cw05") )
 			sh_spec   = str_sub_str(species, "_cw05","" )
 			array_map = cw05_array
 			mode_name = "cw05"
-		else if(isStrSubset(species,"cw06") )
+		elseif(isStrSubset(species,"cw06") )
 			sh_spec   = str_sub_str(species, "_cw06","" )
 			array_map = cw06_array
 			mode_name = "cw06"
-		else if(isStrSubset(species,"cw07") )
+		elseif(isStrSubset(species,"cw07") )
 			sh_spec   = str_sub_str(species, "_cw07","" )
 			array_map = cw07_array
 			mode_name = "cw07"
-		else if(isStrSubset(species,"cw08") )
+		elseif(isStrSubset(species,"cw08") )
 			sh_spec   = str_sub_str(species, "_cw08","" )
 			array_map = cw08_array
 			mode_name = "cw08"
 		else
 			print("get_aerosol: ERROR - input name must contain 'fine', 'coarse', 'tot', 'pm25' or 'pm1'.")
 			exit			
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
-		end if
 		end if
 			
 		; MOSAIC VBS diagnostic species use UC "A" instead of lc "a".
@@ -824,13 +784,12 @@ begin
 			bin_names = (/ (/"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08" /), \
 			               (/"N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A", "N/A" /)  /)
 		; Special case: summed GLYSOA species have              
-		else if(sh_spec .eq. "GLYSOA")
+		elseif(sh_spec .eq. "GLYSOA")
 			bin_names = (/ (/"A01", "A02", "A03", "A04", "A05", "A06", "A07", "A08" /), \
 			               (/"CW01","CW02","CW03","CW04","CW05","CW06","CW07","CW08"/)  /)
 		else
 			bin_names = (/ (/"a01", "a02", "a03", "a04", "a05", "a06", "a07", "a08" /), \
 			               (/"cw01","cw02","cw03","cw04","cw05","cw06","cw07","cw08"/)  /)
-		end if
 		end if
 		
 		; check if there is Aqueous chemistry or not
@@ -864,7 +823,7 @@ begin
 			nbin = 8		
 			
 		; Otherwise sum up in 4-bin mode
-		else if (isfilevar(a[0],"num_a04")) ; is4bin
+		elseif (isfilevar(a[0],"num_a04")) ; is4bin
 			aero_mech = "MOSAIC_4bin"
 			nbin = 4
 
@@ -880,8 +839,7 @@ begin
 		else
 			print("get_aerosol: ERROR - Cannot find bin 4, currently written for MOSAIC 4 or 8bin")
 			exit
-		end if ; is8bin
-		end if ; is4bin
+		end if
 		
 		print("get_aerosol: summing "+species+" in "+aero_mech+" mode") 
 		; print(array_map)
@@ -922,8 +880,7 @@ begin
 	else
 		print("get_aerosol: ERROR - Currently only written for GOCART and MOSAIC 4/8bin aerosol mechanisms")
 		exit
-	end if  ; isgocart 	
-	end if	; ismosaic
+	end if
 
   else
 	  print("get_aerosol: "+species+" is not an aerosol species, needs '_' in name")
@@ -1017,7 +974,7 @@ begin
 
 			units = ""
 
-		else if(isStrSubset(species,"ioratio")) ; solve inorganic:organic ratio
+		elseif(isStrSubset(species,"ioratio")) ; solve inorganic:organic ratio
 
 			vbs_string = "ioratio"
 			
@@ -1055,7 +1012,7 @@ begin
 
 			units = ""
 
-		else if(isStrSubset(species,"vbs_soa_ocratio")) ; solve O:C ratio
+		elseif(isStrSubset(species,"vbs_soa_ocratio")) ; solve O:C ratio
 
 			vbs_string = "vbs_soa_ocratio"
 			
@@ -1112,7 +1069,7 @@ begin
 
 			units = ""
 
-		else if(isStrSubset(species,"anthro_ocratio")) ; solve O:C ratio
+		elseif(isStrSubset(species,"anthro_ocratio")) ; solve O:C ratio
 
 			vbs_string = "anthro_ocratio"
 			
@@ -1149,7 +1106,7 @@ begin
 
 			units = ""
 
-		else if(isStrSubset(species,"ocratio")) ; solve O:C ratio
+		elseif(isStrSubset(species,"ocratio")) ; solve O:C ratio
 
 			vbs_string = "ocratio"
 			
@@ -1194,7 +1151,7 @@ begin
 
 			units = ""
 
-		else if (isStrSubset(species,"frac")) ; calculate mass fractions
+		elseif (isStrSubset(species,"frac")) ; calculate mass fractions
 
 			vbs_string = species
 			
@@ -1322,16 +1279,14 @@ begin
 			
 				var_a = var_a/where(var_tot .gt. 1e-12, var_tot, 1e-12)
 
-			else if(isStrSubset(species,"bburn"))
+			elseif(isStrSubset(species,"bburn"))
 
 				var_a = var_b/where(var_tot .gt. 1e-12, var_tot, 1e-12)
 
-			else if(isStrSubset(species,"invol"))
+			elseif(isStrSubset(species,"invol"))
 
 				var_a = var_c/where(var_tot .gt. 1e-12, var_tot, 1e-12)
 
-			end if
-			end if
 			end if
 
 			units = ""
@@ -1349,28 +1304,28 @@ begin
 								 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
 								 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o" \
 								/)
-			else if(isStrSubset(species,"bboa"))
+			elseif(isStrSubset(species,"bboa"))
 				vbs_string = "bboa"
 				vbs_species = (/ "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
 								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
 								 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
 								 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o" \
 								/)
-			else if(isStrSubset(species,"hsoa"))
+			elseif(isStrSubset(species,"hsoa"))
 				vbs_string = "hsoa"
 				vbs_species = (/ "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
 								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
 								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
 								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o" \
 								/)
-			else if(isStrSubset(species,"bbsoa"))
+			elseif(isStrSubset(species,"bbsoa"))
 				vbs_string = "bbsoa"
 				vbs_species = (/ "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
 								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o" \
 								/)
-			else if(isStrSubset(species,"htoa"))
+			elseif(isStrSubset(species,"htoa"))
 				vbs_string = "htoa"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1381,7 +1336,7 @@ begin
 								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
 								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o" \
 								/)
-			else if(isStrSubset(species,"bbtoa"))
+			elseif(isStrSubset(species,"bbtoa"))
 				vbs_string = "bbtoa"
 				vbs_species = (/ "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
 								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
@@ -1392,12 +1347,20 @@ begin
 								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o" \
 								/)
-			else if(isStrSubset(species,"soa"))
+			elseif(isStrSubset(species,"antsoa"))
+				vbs_string = "antsoa"
+				vbs_species = (/ "ant1_c", "ant2_c", "ant3_c", "ant4_c" \
+								 /)
+			elseif(isStrSubset(species,"biogsoa"))
+				vbs_string = "biogsoa"
+				vbs_species = (/ "biog1_c", "biog2_c", "biog3_c", "biog4_c" \
+								/)
+			elseif(isStrSubset(species,"soa"))
 				vbs_string = "soa"
 				vbs_species = (/ "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
 							 	 "biog1_c", "biog2_c", "biog3_c", "biog4_c" \
 							 	/)
-			else if(isStrSubset(species,"totoa"))
+			elseif(isStrSubset(species,"totoa"))
 				vbs_string = "totoa"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1419,7 +1382,7 @@ begin
 							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc" \
 								/)
-			else if(isStrSubset(species,"OM"))
+			elseif(isStrSubset(species,"OM"))
 				vbs_string = "OM"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1441,7 +1404,7 @@ begin
 							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 							     "oc" \
 								/)
-			else if(isStrSubset(species,"POA"))
+			elseif(isStrSubset(species,"POA"))
 				vbs_string = "POA"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1461,42 +1424,68 @@ begin
 								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
 							     "oc" \
 								/)
-			else if(isStrSubset(species,"vbs1"))
+			elseif(isStrSubset(species,"vbs1"))
 				vbs_string = "vbs1"
 				vbs_species = (/ "pcg1_f_c", "pcg1_f_o", "opcg1_f_c", "opcg1_f_o", \
 								 "pcg1_b_c", "pcg1_b_o", "opcg1_b_c", "opcg1_b_o" /)
-			else if(isStrSubset(species,"vbs2"))
+			elseif(isStrSubset(species,"vbs2"))
 				vbs_string = "vbs2"
 				vbs_species = (/ "pcg2_f_c", "pcg2_f_o", "opcg2_f_c", "opcg2_f_o", \
 								 "pcg2_b_c", "pcg2_b_o", "opcg2_b_c", "opcg2_b_o" /)
-			else if(isStrSubset(species,"vbs3"))
+			elseif(isStrSubset(species,"vbs3"))
 				vbs_string = "vbs3"
 				vbs_species = (/ "pcg3_f_c", "pcg3_f_o", "opcg3_f_c", "opcg3_f_o", \
 								 "pcg3_b_c", "pcg3_b_o", "opcg3_b_c", "opcg3_b_o" /)
-			else if(isStrSubset(species,"vbs4"))
+			elseif(isStrSubset(species,"vbs4"))
 				vbs_string = "vbs4"
 				vbs_species = (/ "pcg4_f_c", "pcg4_f_o", "opcg4_f_c", "opcg4_f_o", \
 								 "pcg4_b_c", "pcg4_b_o", "opcg4_b_c", "opcg4_b_o" /)
-			else if(isStrSubset(species,"vbs5"))
+			elseif(isStrSubset(species,"vbs5"))
 				vbs_string = "vbs5"
 				vbs_species = (/ "pcg5_f_c", "pcg5_f_o", "opcg5_f_c", "opcg5_f_o", \
 								 "pcg5_b_c", "pcg5_b_o", "opcg5_b_c", "opcg5_b_o" /)
-			else if(isStrSubset(species,"vbs6"))
+			elseif(isStrSubset(species,"vbs6"))
 				vbs_string = "vbs6"
 				vbs_species = (/ "pcg6_f_c", "pcg6_f_o", "opcg6_f_c", "opcg6_f_o", \
 								 "pcg6_b_c", "pcg6_b_o", "opcg6_b_c", "opcg6_b_o" /)
-			else if(isStrSubset(species,"vbs7"))
+			elseif(isStrSubset(species,"vbs7"))
 				vbs_string = "vbs7"
 				vbs_species = (/ "pcg7_f_c", "pcg7_f_o", "opcg7_f_c", "opcg7_f_o", \
 								 "pcg7_b_c", "pcg7_b_o", "opcg7_b_c", "opcg7_b_o" /)
-			else if(isStrSubset(species,"vbs8"))
+			elseif(isStrSubset(species,"vbs8"))
 				vbs_string = "vbs8"
 				vbs_species = (/ "pcg8_f_c", "pcg8_f_o", "opcg8_f_c", "opcg8_f_o", \
 								 "pcg8_b_c", "pcg8_b_o", "opcg8_b_c", "opcg8_b_o" /)
-			else if(isStrSubset(species,"vbs9"))
+			elseif(isStrSubset(species,"vbs9"))
 				vbs_string = "vbs9"
 				vbs_species = (/ "pcg9_f_c", "pcg9_f_o", "pcg9_b_c", "pcg9_b_o" /)
-			else if(isStrSubset(species,"ALL"))
+			elseif(isStrSubset(species,"INORG"))
+				vbs_string = "INORG"
+				vbs_species = (/ "so4", "no3", "nh4", "na", "cl" \
+								/)
+			elseif(isStrSubset(species,"ALLDRY"))
+				vbs_string = "ALLDRY"
+				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
+								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
+								 "pcg1_f_o", "pcg2_f_o", "pcg3_f_o", "pcg4_f_o", \
+								 "pcg5_f_o", "pcg6_f_o", "pcg7_f_o", "pcg8_f_o", "pcg9_f_o", \
+								 "pcg1_b_c", "pcg2_b_c", "pcg3_b_c", "pcg4_b_c", \
+								 "pcg5_b_c", "pcg6_b_c", "pcg7_b_c", "pcg8_b_c", "pcg9_b_c", \
+								 "pcg1_b_o", "pcg2_b_o", "pcg3_b_o", "pcg4_b_o", \
+								 "pcg5_b_o", "pcg6_b_o", "pcg7_b_o", "pcg8_b_o", "pcg9_b_o", \
+								 "opcg1_f_c", "opcg2_f_c", "opcg3_f_c", "opcg4_f_c", \
+								 "opcg5_f_c", "opcg6_f_c", "opcg7_f_c", "opcg8_f_c", \
+								 "opcg1_f_o", "opcg2_f_o", "opcg3_f_o", "opcg4_f_o", \
+								 "opcg5_f_o", "opcg6_f_o", "opcg7_f_o", "opcg8_f_o", \
+								 "opcg1_b_c", "opcg2_b_c", "opcg3_b_c", "opcg4_b_c", \
+								 "opcg5_b_c", "opcg6_b_c", "opcg7_b_c", "opcg8_b_c", \
+								 "opcg1_b_o", "opcg2_b_o", "opcg3_b_o", "opcg4_b_o", \
+								 "opcg5_b_o", "opcg6_b_o", "opcg7_b_o", "opcg8_b_o", \
+								 "ant1_c", "ant2_c", "ant3_c", "ant4_c", \
+								 "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
+								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin" \
+								/)
+			elseif(isStrSubset(species,"ALL"))
 				vbs_string = "ALL"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1518,7 +1507,7 @@ begin
 							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin", "water" \
 								/)
-			else if(isStrSubset(species,"DRY"))
+			elseif(isStrSubset(species,"DRY"))
 				vbs_string = "DRY"
 				vbs_species = (/ "pcg1_f_c", "pcg2_f_c", "pcg3_f_c", "pcg4_f_c", \
 								 "pcg5_f_c", "pcg6_f_c", "pcg7_f_c", "pcg8_f_c", "pcg9_f_c", \
@@ -1540,27 +1529,6 @@ begin
 							     "biog1_c", "biog2_c", "biog3_c", "biog4_c", \
 								 "oc", "bc", "so4", "no3", "nh4", "na", "cl", "oin" \
 								/)
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if		
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
-			end if
 			end if
 
 			vbs_species_2 = vbs_species
@@ -1599,12 +1567,7 @@ begin
 			desc = str_sub_str(desc, vbs_species_2(0), vbs_string)
 			var_a@description = desc
 		
-		end if ; select for fraction processing or not
-		end if ; select for O:C ratio solving or not
-		end if ; select for VBS+SOA O:C ratio solving or not		
-		end if ; select for inorganic:organic ratio solving or not
-		end if ; select for AMS relevant inorganic:organic ratio solving or not
-		
+		end if
 
 
 	else
@@ -1700,18 +1663,16 @@ begin
 	if(isStrSubset(var_name,"_pm1"))
 		tail = "_pm1"
 		tail_text = "PM1 "
-	else if(isStrSubset(var_name,"_pm25"))
+	elseif(isStrSubset(var_name,"_pm25"))
 		tail = "_pm25"
 		tail_text = "PM2.5 "
-	else if(isStrSubset(var_name,"_tot"))
+	elseif(isStrSubset(var_name,"_tot"))
 		tail = "_tot"
 		tail_text = "PM10 "
 	else
 		print("don't recognise this variable array '"+var_name+"', so not calculating aerosol mass fraction")
 		break
 	end if
-	end if
-	end if	
 
 		
 	; load individual chemical species
@@ -1735,38 +1696,31 @@ begin
 	if(isStrSubset(var_name,"cl"))
 		var_temp = where(var_temp_total.gt.0,var_temp_cl/var_temp_total,-9999)
 		desc = tail_text+"Chloride mass fraction"
-	else if(isStrSubset(var_name,"na"))
+	elseif(isStrSubset(var_name,"na"))
 		var_temp = where(var_temp_total.gt.0,var_temp_na/var_temp_total,-9999)
 		desc = tail_text+"Sodium mass fraction"
-	else if(isStrSubset(var_name,"no3"))
+	elseif(isStrSubset(var_name,"no3"))
 		var_temp = where(var_temp_total.gt.0,var_temp_no3/var_temp_total,-9999)
 		desc = tail_text+"Nitrate mass fraction"
-	else if(isStrSubset(var_name,"so4"))
+	elseif(isStrSubset(var_name,"so4"))
 		var_temp = where(var_temp_total.gt.0,var_temp_so4/var_temp_total,-9999)
 		desc = tail_text+"Sulphate mass fraction"
-	else if(isStrSubset(var_name,"nh4"))
+	elseif(isStrSubset(var_name,"nh4"))
 		var_temp = where(var_temp_total.gt.0,var_temp_nh4/var_temp_total,-9999)
 		desc = tail_text+"Ammonium mass fraction"
-	else if(isStrSubset(var_name,"oin"))
+	elseif(isStrSubset(var_name,"oin"))
 		var_temp = where(var_temp_total.gt.0,var_temp_oin/var_temp_total,-9999)
 		desc = tail_text+"Other inorganics mass fraction"
-	else if(isStrSubset(var_name,"bc"))
+	elseif(isStrSubset(var_name,"bc"))
 		var_temp = where(var_temp_total.gt.0,var_temp_bc/var_temp_total,-9999)
 		desc = tail_text+"Black carbon mass fraction"
-	else if(isStrSubset(var_name,"OM"))
+	elseif(isStrSubset(var_name,"OM"))
 		var_temp = where(var_temp_total.gt.0,var_temp_om/var_temp_total,-9999)
 		desc = tail_text+"OM mass fraction"
 	else
 		print("don't recognise this chemical variable '"+var_name+"', so not calculating aerosol mass fraction")
 		break
 	
-	end if
-	end if
-	end if	
-	end if
-	end if
-	end if
-	end if	
 	end if
 	
 	; Copy meta data from dummy	
@@ -1795,18 +1749,16 @@ begin
 	if(isStrSubset(var_name,"_pm1"))
 		tail = "_pm1"
 		tail_text = "PM1 total mass"
-	else if(isStrSubset(var_name,"_pm25"))
+	elseif(isStrSubset(var_name,"_pm25"))
 		tail = "_pm25"
 		tail_text = "PM2.5 total mass"
-	else if(isStrSubset(var_name,"_tot"))
+	elseif(isStrSubset(var_name,"_tot"))
 		tail = "_tot"
 		tail_text = "PM10 total mass"
 	else
 		print("don't recognise this variable array '"+var_name+"', so not calculating aerosol mass fraction")
 		break
 	end if
-	end if
-	end if	
 
 		
 	; load individual chemical species
@@ -1894,9 +1846,8 @@ begin
 		dims = dimsizes(var_temp)
 		if(dimsizes(dims).eq.4)
 			var_temp_a = dim_sum_n_Wrap(var_temp,1)	
-		else if(dimsizes(dims).eq.3)
+		elseif(dimsizes(dims).eq.3)
 			var_temp_a = dim_sum_n_Wrap(var_temp,0)			
-		end if
 		end if
 		var_temp_a@units = "molecules/cm2"
 
@@ -1952,7 +1903,7 @@ begin
 
 
 	; If we want the Aerosol Optical Thickness at 550nm wavelength, then follow this process
-	else if(var .eq. "TAU55" .or. var .eq. "AOD550")
+	elseif(var .eq. "TAU55" .or. var .eq. "AOD550")
 		;Calculate tau, from two given wavelengths (i.e. intermediate btwn the two lambda's)  
 		lambda_1 = 300.                                ; wavelength1
 		tau_1 = wrf_user_getvar(FILES,"TAUAER1",-1)         ; AOD data for wavelength1
@@ -1964,22 +1915,21 @@ begin
 	
 		if(var .eq. "TAU55")
 			var_temp = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
-		else if(var .eq. "AOD550")
+		elseif(var .eq. "AOD550")
 			var_temp_a = calc_new_tau_PNNL(lambda_1, tau_1, lambda_2, tau_2, lambda_3, tau_3, lambda_new)
 			; sum over vertical axis (dimension #1)
 			var_temp = dim_sum_n_Wrap(var_temp_a,1)
 		end if
-		end if
 
 	; If we wish to get the column concentration of a gas through the atmosphere then follow this process
-	else if(isStrSubset(var,"_column"))
+	elseif(isStrSubset(var,"_column"))
 
 		
 		var_temp = column_data_calculation(FILES,var)
 
 	
 	; If we wish to find the value of something below cloud then follow this process
-	else if(isStrSubset(var,"_belowcloud").or.isStrSubset(var,"_atcloud"))
+	elseif(isStrSubset(var,"_belowcloud").or.isStrSubset(var,"_atcloud"))
 	
 		; define what our minimum QCLOUD (liquid water content) is for it to be a cloud
 		; this is in g kg-1
@@ -1989,19 +1939,17 @@ begin
 	
 		if(isStrSubset(var,"_belowcloudbase"))
 			var_name = str_sub_str(var, "_belowcloudbase","" )
-		else if(isStrSubset(var,"_belowcloud"))
+		elseif(isStrSubset(var,"_belowcloud"))
 			var_name = str_sub_str(var, "_belowcloud","" )
-		else if(isStrSubset(var,"_atcloudbase"))
+		elseif(isStrSubset(var,"_atcloudbase"))
 			var_name = str_sub_str(var, "_atcloudbase","" )
-		else if(isStrSubset(var,"_atcloud"))
+		elseif(isStrSubset(var,"_atcloud"))
 			var_name = str_sub_str(var, "_atcloud","" )
 		else
 			print("don't recognise variable ending: "+var)
 			exit
 		end if
-		end if
-		end if
-		end if
+
 
 		; extract variable data
 		if(isStrSubset(var_name,"_a0") .or. isStrSubset(var_name,"_cw0") .or. \
@@ -2016,13 +1964,13 @@ begin
 				var_temp_b = get_aerosol(FILES,var_name,True,-1)		
 			end if
 
-		else if(var_name .eq. "depth")
+		elseif(var_name .eq. "depth")
 			var_temp_b = wrf_user_getvar(FILES,"height",-1)
 			dims = dimsizes(var_temp_b)
 			var_temp_b(:,0:dims(1)-2,:,:) = var_temp_b(:,1:dims(1)-1,:,:) - var_temp_b(:,0:dims(1)-2,:,:)
 			var_temp_b@description = "depth"
 		
-		else if(var_name .eq. "RHreduceAW")
+		elseif(var_name .eq. "RHreduceAW")
 			;;; this is the calculation of the reduction in RH that would occur
 			;;; if we removed aerosol water from water vapour.
 		
@@ -2061,8 +2009,6 @@ begin
 			
 		else
 			var_temp_b = wrf_user_getvar(FILES,var_name,-1)
-		end if
-		end if
 		end if
 		
 		
@@ -2114,7 +2060,7 @@ begin
 			end if
 
 
-		else if(isStrSubset(var,"atcloudbase"))
+		elseif(isStrSubset(var,"atcloudbase"))
 		; Find the grid cells with cloud, but without cloud in the grid cell below
 		;   (NOTE: this will ignore ground fog!)
 		
@@ -2143,7 +2089,7 @@ begin
 			var_temp@description = var_temp_b@description+" at cloud base"
 			
 
-		else if(isStrSubset(var,"atcloud"))
+		elseif(isStrSubset(var,"atcloud"))
 		; Find the grid cells with cloud, but without cloud in the grid cell below
 
 			var_temp = where(var_cloud.gt.q_min, var_temp_b, -9999)
@@ -2151,8 +2097,6 @@ begin
 			var_temp@description = var_temp_b@description+" in cloud"
 
 
-		end if
-		end if
 		end if
 
 
@@ -2163,7 +2107,7 @@ begin
 	
 	
 	; If we want to calculate the cloud water pH then we follow this process
-	else if(isStrSubset(var,"pH_")) 
+	elseif(isStrSubset(var,"pH_")) 
 	
 		if (var .eq. "pH_cw")  
 			var_temp = get_cloud_ph(FILES,-1)
@@ -2173,7 +2117,7 @@ begin
 		end if
 
 	; If we want to calculate the wind speed
-	else if(isStrSubset(var,"windspeed")) 
+	elseif(isStrSubset(var,"windspeed")) 
 	
 		if (var .eq. "windspeed_10")  
 			uu = wrf_user_getvar(FILES,"U10",-1)  ; u at 10 m
@@ -2187,7 +2131,7 @@ begin
 		
 	
 	; If we want to calculate the wind direction
-	else if(isStrSubset(var,"winddirection")) 
+	elseif(isStrSubset(var,"winddirection")) 
 	
 		if (var .eq. "winddirection_10")  
 			uvmet = wrf_user_getvar(FILES,"uvmet10",-1)  ; u & v at 10 m
@@ -2209,7 +2153,7 @@ begin
 	
 
 	; calculate the aerosol mass fraction contribution from selected aerosol species
-	else if(isStrSubset(var,"_fraction"))
+	elseif(isStrSubset(var,"_fraction"))
 	
 		; determine what species we're processing
 		var_name_temp = str_sub_str(var, "_fraction", "")
@@ -2218,13 +2162,13 @@ begin
 	
 	
 	; calculate the aerosol total mass
-	else if(isStrSubset(var,"totalmass_"))
+	elseif(isStrSubset(var,"totalmass_"))
 	
 		var_temp = calculate_aerosol_totalmass(FILES,var,vbs)	
 	
 	
 	; Do quick and dirty check to see if input species name is an aerosol species.
-	else if(isStrSubset(var,"_a0") .or. isStrSubset(var,"_cw0") .or. \
+	elseif(isStrSubset(var,"_a0") .or. isStrSubset(var,"_cw0") .or. \
 			isStrSubset(var,"_A0") .or. isStrSubset(var,"_CW0") .or. \
 			isStrSubset(var,"_fine") .or. isStrSubset(var,"_coarse") .or. \
 			isStrSubset(var,"_pm1") .or. isStrSubset(var,"_pm25") .or. isStrSubset(var,"_tot") )
@@ -2240,15 +2184,7 @@ begin
 		var_temp = wrf_user_getvar(FILES,var,-1)
 	
 	end if
-	end if
-	end if
-	end if
-	end if
-	end if
-	end if
-	end if
-	end if
-	end if
+
 
 
 	; check to see if we have specified a unit conversion for this variable
@@ -2261,10 +2197,10 @@ begin
 			if(unit_new .eq. "ppbv")
 				var_temp = var_temp * 1000.0
 				var_temp@units = unit_new
-			else if(unit_new .eq. "pptv")
+			elseif(unit_new .eq. "pptv")
 				var_temp = var_temp * 1000.0 * 1000.0
 				var_temp@units = unit_new
-			else if(unit_new .eq. "ug/kg-dryair")
+			elseif(unit_new .eq. "ug/kg-dryair")
 				if(var_units@$var$(2).eq."vbs")
 					var_temp = var_temp * 1000.0  ;; first convert to ppbv
 					var_temp = var_temp / (m_dry/m_vbs)
@@ -2272,7 +2208,7 @@ begin
 				else
 					print("don't recognise molecular weight flag ("+var_units@$var$(2)+"), so not converting from ppmv to ug/kg-dryair")
 				end if
-			else if(unit_new .eq. "molecules/cm3" .or. unit_new .eq. "molecules/cm~S~3~N~")
+			elseif(unit_new .eq. "molecules/cm3" .or. unit_new .eq. "molecules/cm~S~3~N~")
 				; convert from ppm to molecules / cm3
 				pres = wrf_user_getvar(FILES,"pres",-1)
 				tk   = wrf_user_getvar(FILES,"tk",-1)
@@ -2282,11 +2218,9 @@ begin
 			else
 				print("don't recognise new unit '"+new_unit+"', so not converting units")		
 			end if
-			end if
-			end if
-			end if
+
 		
-		else if(unit_old .eq. "K") ;;;;;;;;;;;;;; Kelvin
+		elseif(unit_old .eq. "K") ;;;;;;;;;;;;;; Kelvin
 			if(unit_new .eq. "C")
 				var_temp = var_temp - 273.15
 				var_temp@units = unit_new
@@ -2294,43 +2228,39 @@ begin
 				print("don't recognise new unit '"+new_unit+"', so not converting units")			
 			end if
 
-		else if(unit_old .eq. "kg kg-1") ;;;;;;;;;;;;;; kg / kg (mixing ratio)
+		elseif(unit_old .eq. "kg kg-1") ;;;;;;;;;;;;;; kg / kg (mixing ratio)
 			if(unit_new .eq. "g kg-1")
 				var_temp = var_temp * 1000.
 				var_temp@units = unit_new
-			else if(unit_new .eq. "mg kg-1")
+			elseif(unit_new .eq. "mg kg-1")
 				var_temp = var_temp * 1000. * 1000.
 				var_temp@units = unit_new
-			else if(unit_new .eq. "g scm-3")
+			elseif(unit_new .eq. "g scm-3")
 				var_temp = var_temp * conv_kg_sm3 ; kg-1 to sm-3
 				var_temp = var_temp * 1000. / 1e6  ; (kg->g) & (sm-3 -> scm-3)				
 				var_temp@units = unit_new
 			else
 				print("don't recognise new unit '"+new_unit+"', so not converting units")			
 			end if
-			end if
-			end if
 
-		else if(unit_old .eq. " kg-1") ;;;;;;;;;;;;;; # / kg (mixing ratio)
+
+		elseif(unit_old .eq. " kg-1") ;;;;;;;;;;;;;; # / kg (mixing ratio)
 			if(unit_new .eq. "M# kg-1")
 				var_temp = var_temp / ( 1000. * 1000. )
 				var_temp@units = unit_new
-			else if(unit_new .eq. " scm-3")
+			elseif(unit_new .eq. " scm-3")
 				var_temp = var_temp * conv_kg_sm3 ; kg-1 to sm-3
 				var_temp = var_temp / 1e6  ; sm-3 -> scm-3				
 				var_temp@units = unit_new
 			else
 				print("don't recognise new unit '"+new_unit+"', so not converting units")			
 			end if
-			end if
 
 		else
 			print("don't recognise old unit '"+old_unit+"', so not converting units")
 		
 		end if
-		end if
-		end if
-		end if
+
 
 
 	end if
