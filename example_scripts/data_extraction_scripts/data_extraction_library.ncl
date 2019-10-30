@@ -43,6 +43,7 @@ VBS_SPECIES@ioratio_pm1 = True
 VBS_SPECIES@amsratio_pm1 = True
 VBS_SPECIES@ALL_pm25 = True
 VBS_SPECIES@DRY_pm25 = True
+VBS_SPECIES@DRY_tot = True
 
 
 ;;; default colormap - this could be changed in the calling script if needed
