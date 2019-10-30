@@ -47,6 +47,12 @@ VBS_SPECIES@DRY_tot = True
 VBS_SPECIES@POA_tot = True
 VBS_SPECIES@POA_pm25 = True
 VBS_SPECIES@POA_pm1 = True
+VBS_SPECIES@soa_tot = True
+VBS_SPECIES@soa_pm25 = True
+VBS_SPECIES@soa_pm1 = True
+VBS_SPECIES@AMSINORG_tot = True
+VBS_SPECIES@AMSINORG_pm25 = True
+VBS_SPECIES@AMSINORG_pm1 = True
 
 
 ;;; default colormap - this could be changed in the calling script if needed
