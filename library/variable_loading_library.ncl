@@ -1459,13 +1459,13 @@ begin
 			elseif(isStrSubset(species,"vbs9"))
 				vbs_string = "vbs9"
 				vbs_species = (/ "pcg9_f_c", "pcg9_f_o", "pcg9_b_c", "pcg9_b_o" /)
-			elseif(isStrSubset(species,"INORG"))
-				vbs_string = "INORG"
-				vbs_species = (/ "so4", "no3", "nh4", "na", "cl" \
-								/)
 			elseif(isStrSubset(species,"AMSINORG"))
 				vbs_string = "AMSINORG"
 				vbs_species = (/ "so4", "no3", "nh4", "cl" \
+								/)
+			elseif(isStrSubset(species,"INORG"))
+				vbs_string = "INORG"
+				vbs_species = (/ "so4", "no3", "nh4", "na", "cl" \
 								/)
 			elseif(isStrSubset(species,"ALLDRY"))
 				vbs_string = "ALLDRY"
